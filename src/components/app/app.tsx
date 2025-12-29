@@ -1,13 +1,12 @@
-import { ConstructorPage } from '@pages';
+import { RouterProvider, useLocation } from 'react-router-dom';
 import '../../index.css';
 import styles from './app.module.css';
 
-import { AppHeader } from '@components';
+import { router } from '../../routes/router';
 
 const App = () => (
   <div className={styles.app}>
-    <AppHeader />
-    <ConstructorPage />
+    <RouterProvider router={router} />
   </div>
 );
 
