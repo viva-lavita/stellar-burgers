@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+  createSelector
+} from '@reduxjs/toolkit';
 
 import { getFeedsApi } from '@api';
 import { TOrder, TOrdersData } from '@utils-types';
@@ -44,6 +49,7 @@ export const feedSlice = createSlice({
     builder
       .addCase(getFeeds.pending, (state) => {
         state.isLoading = true;
+        console.log('getFeeds.pending');
         state.error = null;
       })
       .addCase(

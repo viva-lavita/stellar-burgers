@@ -22,7 +22,7 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => (
           </Link>
         </>
         <>
-          {userName !== 'Загружается...' && userName && (
+          {userName !== 'Загружается...' && (
             <>
               <ListIcon type={'primary'} />
               <Link

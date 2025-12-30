@@ -72,6 +72,9 @@ export const orderSlice = createSlice({
   reducers: {
     resetCurrentOrder: (state) => {
       state.currentOrder = null;
+    },
+    setCurrentOrder: (state, action: PayloadAction<TOrder>) => {
+      state.currentOrder = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -122,6 +125,13 @@ export const orderSlice = createSlice({
         getOrderByNumber.fulfilled,
         (state, action: PayloadAction<TOrder>) => {
           state.currentOrder = action.payload;
+          const existingIndex = state.allOrders.findIndex(
+            (order) => order.number === action.payload.number
+          );
+
+          if (existingIndex === -1) {
+            state.allOrders.push(action.payload);
+          }
           state.loading = false;
           state.error = null;
         }
@@ -151,6 +161,6 @@ export const {
   selectOrderError
 } = orderSlice.selectors;
 
-export const { resetCurrentOrder } = orderSlice.actions;
+export const { resetCurrentOrder, setCurrentOrder } = orderSlice.actions;
 
 export default orderSlice.reducer;

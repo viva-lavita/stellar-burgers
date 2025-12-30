@@ -3,30 +3,40 @@ import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { useDispatch } from '../../services/store';
-import { useSelector } from 'react-redux';
+import { useSelector } from '../../services/store';
+import {
+  selectIngredients,
+  selectOrderError,
+  selectOrderLoading
+} from '@selectors';
+import { useParams } from 'react-router-dom';
 import {
   getOrderByNumber,
-  resetCurrentOrder
+  resetCurrentOrder,
+  setCurrentOrder
 } from '../../services/slices/order/order-slice';
-import { selectCurrentOrder, selectIngredients } from '@selectors';
-import { useParams } from 'react-router-dom';
-import { getIngredients } from '../../services/slices/ingredient/ingredient-slice';
 
 export const OrderInfo: FC = () => {
   const dispatch = useDispatch();
-  const orderData = useSelector(selectCurrentOrder);
   const ingredients: TIngredient[] = useSelector(selectIngredients);
   const { number } = useParams();
+  const orderNumber = Number(number);
+  const orderData = useSelector((state) =>
+    state.order.allOrders.find((item) => item.number === orderNumber)
+  );
+  const isLoadingOrder = useSelector(selectOrderLoading);
+  const ordersError = useSelector(selectOrderError);
 
   useEffect(() => {
-    dispatch(getOrderByNumber(Number(number)));
-    if (!ingredients.length) {
-      dispatch(getIngredients());
+    if (orderData) {
+      dispatch(setCurrentOrder(orderData));
+    } else if (orderNumber && !orderData && !isLoadingOrder && !ordersError) {
+      dispatch(getOrderByNumber(orderNumber));
     }
     return () => {
       dispatch(resetCurrentOrder());
     };
-  }, [number]);
+  }, [orderNumber, orderData, isLoadingOrder, ordersError]);
 
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -69,9 +79,20 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  // прелоадер, пока загружаем ингредиенты или заказ с бэка
+  if (!orderInfo || isLoadingOrder) {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      <p
+        className='text text_type_digits-default'
+        style={{ textAlign: 'center' }}
+      >
+        #{orderInfo.number}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

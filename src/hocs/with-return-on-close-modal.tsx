@@ -22,16 +22,10 @@ export function withReturnOnCloseModal<P extends WrappedComponentProps>(
     const navigate = useNavigate();
     const location = useLocation();
 
-    // рендерим компонент без модального окна при переходе по прямой ссылке
-    if (location.key === 'default') {
-      return <WrappedComponent {...(restProps as P)} />;
-    }
-    // или еще вариант:
     const backgroundLocation = location.state?.background;
     if (!backgroundLocation) {
       return <WrappedComponent {...(restProps as P)} />;
     }
-    // но тут лишние параметры, от которых в целом наверно можно избавиться вообще
 
     const onClose = () => {
       navigate(-1);
