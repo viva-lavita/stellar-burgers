@@ -26,3 +26,9 @@
 .detailHeader {
   text-align: center;
 }
+
+.centerContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

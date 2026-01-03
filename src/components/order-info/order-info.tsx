@@ -1,23 +1,43 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
+import { useDispatch } from '../../services/store';
+import { useSelector } from '../../services/store';
+import {
+  selectIngredients,
+  selectOrderError,
+  selectOrderLoading
+} from '@selectors';
+import { useParams } from 'react-router-dom';
+import {
+  getOrderByNumber,
+  resetCurrentOrder,
+  setCurrentOrder
+} from '../../services/slices/order/order-slice';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const dispatch = useDispatch();
+  const ingredients: TIngredient[] = useSelector(selectIngredients);
+  const { number } = useParams();
+  const orderNumber = Number(number);
+  const orderData = useSelector((state) =>
+    state.order.allOrders.find((item) => item.number === orderNumber)
+  );
+  const isLoadingOrder = useSelector(selectOrderLoading);
+  const ordersError = useSelector(selectOrderError);
 
-  const ingredients: TIngredient[] = [];
+  useEffect(() => {
+    if (orderData) {
+      dispatch(setCurrentOrder(orderData));
+    } else if (orderNumber && !orderData && !isLoadingOrder && !ordersError) {
+      dispatch(getOrderByNumber(orderNumber));
+    }
+    return () => {
+      dispatch(resetCurrentOrder());
+    };
+  }, [orderNumber, orderData, isLoadingOrder, ordersError]);
 
-  /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -59,9 +79,20 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  // прелоадер, пока загружаем ингредиенты или заказ с бэка
+  if (!orderInfo || isLoadingOrder) {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      <p
+        className='text text_type_digits-default'
+        style={{ textAlign: 'center' }}
+      >
+        #{orderInfo.number}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

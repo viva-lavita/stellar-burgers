@@ -1,0 +1,40 @@
+import React, { ComponentType, ReactElement, ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { TModalProps } from '../components/modal/type';
+import { Modal } from '../components/modal/modal';
+
+interface WrappedComponentProps {}
+
+interface WithReturnOnCloseModalProps extends Pick<TModalProps, 'title'> {}
+
+type EnhancedProps<P> = P &
+  WithReturnOnCloseModalProps & {
+    children?: ReactNode;
+  };
+
+export function withReturnOnCloseModal<P extends WrappedComponentProps>(
+  WrappedComponent: ComponentType<P>
+): ComponentType<EnhancedProps<P>> {
+  return function WithReturnOnCloseModal(
+    props: EnhancedProps<P>
+  ): ReactElement {
+    const { title, ...restProps } = props;
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const backgroundLocation = location.state?.background;
+    if (!backgroundLocation) {
+      return <WrappedComponent {...(restProps as P)} />;
+    }
+
+    const onClose = () => {
+      navigate(-1);
+    };
+
+    return (
+      <Modal onClose={onClose} title={title}>
+        <WrappedComponent {...(restProps as P)} />
+      </Modal>
+    );
+  };
+}

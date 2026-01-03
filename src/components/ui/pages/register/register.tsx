@@ -25,6 +25,7 @@ export const RegisterUI: FC<RegisterUIProps> = ({
         className={`pb-15 ${styles.form}`}
         name='register'
         onSubmit={handleSubmit}
+        autoComplete='off'
       >
         <>
           <div className='pb-6'>
