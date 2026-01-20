@@ -5,7 +5,7 @@
 // 4 Пробуем сделать заказ, авторизованным и неавторизованным пользователем
 // 5 Проверяем, что состав заказа корректно сформирован, модалка закрывается при клике на оверлей. Заказ есть на странице заказов.
 
-import { set } from 'cypress/types/lodash';
+import { add, set } from 'cypress/types/lodash';
 import { setCookie, deleteCookie } from '../../src/utils/cookie';
 import ingredientFixture from '../fixtures/ingredients.json';
 import orderFixture from '../fixtures/order.json';
@@ -213,6 +213,22 @@ describe('Тестирование страницы конструктора', (
       // Закываем модальное окно
       cy.get('[data-testid="close-modal-button"]').click();
       cy.get(modal).should('not.exist');
+
+      // Конструктор стал пустым
+      cy.get('[data-testid="no-buns-top"]').should(
+        'exist'
+      );
+      cy.get('[data-testid="no-buns-bottom"]').should(
+        'exist'
+      );
+      cy.get('[data-testid="no-ingredients"]').should(
+        'exist'
+      );
+
+      cy.get(addedMain).should('not.exist');
+
+      // Цена стала 0
+      cy.get(totalPrice).should('have.text', '0');
     });
 
     afterEach(() => {
