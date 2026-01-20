@@ -10,23 +10,6 @@ import { setCookie, deleteCookie } from '../../src/utils/cookie';
 import ingredientFixture from '../fixtures/ingredients.json';
 import orderFixture from '../fixtures/order.json';
 
-// describe('Тестирование страницы', () => {
-//   it('Проверка доступности и выполнения на странице необходимых запросов для авторизованного пользователя', () => {
-//     setCookie('accessToken', '123');
-//     localStorage.setItem('refreshToken', '123');
-//     cy.intercept('/api/ingredients', { fixture: 'ingredients' }).as(
-//       'getIngredients'
-//     );
-//     // если нет токенов auth/user не вызывается
-//     cy.intercept('/api/auth/user', { fixture: 'user' }).as('getUser');
-//     cy.visit('/');
-//     cy.wait('@getIngredients');
-//     cy.wait('@getUser');
-//     deleteCookie('accessToken');
-//     localStorage.removeItem('refreshToken');
-//   });
-// });
-
 const buns = "[data-testid='ingredient-bun']";
 const mains = "[data-testid='ingredient-main']";
 const sauce = "[data-testid='ingredient-sauce']";
