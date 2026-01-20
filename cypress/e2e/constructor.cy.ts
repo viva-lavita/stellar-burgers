@@ -12,12 +12,10 @@ import orderFixture from '../fixtures/order.json';
 
 const buns = "[data-testid='ingredient-bun']";
 const mains = "[data-testid='ingredient-main']";
-const sauce = "[data-testid='ingredient-sauce']";
 const constructor = "[data-testid='constructor']";
 const totalPrice = "[data-testid='total-price']";
 const firstBunFixture = ingredientFixture.data[0];
 const firstMainFixture = ingredientFixture.data[1];
-const firstSauceFixture = ingredientFixture.data[3];
 const addedMain = "[data-testid='added-ingredient-main']";
 const modal = '[data-testid="modal"]';
 const preloader = '[data-testid="preloader"]';
@@ -69,6 +67,27 @@ describe('Тестирование конструктора неавторизо
     // Проверяем, что таб перелистнул список на начинки
     cy.get(mains).should('be.visible');
     cy.get(buns).should('not.be.visible');
+  });
+
+  // Закрытие на кнопку в модальном окне тестируется в тесте создания заказа
+  it('Клик на ингредиент, открытие модалки, закрытие по клику на оверлей', () => {
+    // Кликаем на ингредиент
+    cy.get(mains).first().click();
+
+    // Проверяем, что модалка открылась
+    cy.get(modal).should('be.visible');
+
+    // Информация в модальном окне соответствует ингредиенту
+    cy.get('[data-testid="ingredient-name"]').should(
+      'contain.text',
+      firstMainFixture.name
+    )
+
+    // Кликаем на оверлей
+    cy.get('[data-testid="overlay"]').click({ force: true });
+
+    // Проверяем, что модалка закрылась
+    cy.get(modal).should('not.exist');
   });
 
   it('Кейс добавления булки в конструктор', () => {
