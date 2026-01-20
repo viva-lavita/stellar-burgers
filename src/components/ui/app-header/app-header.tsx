@@ -29,7 +29,10 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => (
                 to='/feed'
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <p className='text text_type_main-default ml-2'>
+                <p
+                  className='text text_type_main-default ml-2'
+                  data-testid='feed-link'
+                >
                   Лента заказов
                 </p>
               </Link>

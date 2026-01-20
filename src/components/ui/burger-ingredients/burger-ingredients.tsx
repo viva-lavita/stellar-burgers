@@ -22,7 +22,7 @@ export const BurgerIngredientsUI: FC<BurgerIngredientsUIProps> = memo(
     <>
       <section className={styles.burger_ingredients}>
         <nav>
-          <ul className={styles.menu}>
+          <ul className={styles.menu} data-testid='tabs'>
             <Tab value='bun' active={currentTab === 'bun'} onClick={onTabClick}>
               Булки
             </Tab>

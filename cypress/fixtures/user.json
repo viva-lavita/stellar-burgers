@@ -1,0 +1,9 @@
+{
+    "success": true,
+    "accessToken": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NTBhZGIzYTY0MTc3MDAxYjMyNTM3ZSIsImlhdCI6MTc2ODUxNjk3OCwiZXhwIjoxNzY4NTE4MTc4fQ.bgvwhVD6r3KkqNOlsdbJ5L8FlAE0JDmgmZyVgjvwkos",
+    "refreshToken": "2073825996623b63d4c33d3e10a41325eac92673266bf65ea391059edea793f487b6724e92f9c54b",
+    "user": {
+        "email": "admin@ro.ru",
+        "name": "Юзер Юзерович"
+    }
+}
