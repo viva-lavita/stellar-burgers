@@ -20,10 +20,8 @@ export const getUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
       const response = await getUserApi();
       return response.user;
     } catch (error) {
-      if (error instanceof Error && 'message' in error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('Произошла ошибка при загрузке пользователя');
+      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      return rejectWithValue(message);
     }
   }
 );
@@ -39,10 +37,8 @@ export const registerUser = createAsyncThunk<
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при регистрации пользователя');
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    return rejectWithValue(message);
   }
 });
 
@@ -57,10 +53,8 @@ export const loginUser = createAsyncThunk<
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при авторизации пользователя');
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    return rejectWithValue(message);
   }
 });
 
@@ -72,10 +66,8 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
       localStorage.removeItem('refreshToken');
       setCookie('accessToken', '', { expires: -1 });
     } catch (error) {
-      if (error instanceof Error && 'message' in error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('Произошла ошибка при выходе пользователя');
+      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      return rejectWithValue(message);
     }
   }
 );
@@ -89,10 +81,8 @@ export const updateUser = createAsyncThunk<
     const response = await updateUserApi(data);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при обновлении пользователя');
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    return rejectWithValue(message);
   }
 });
 
@@ -104,10 +94,8 @@ export const forgotPassword = createAsyncThunk<
   try {
     await forgotPasswordApi({ email });
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при восстановлении пароля');
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    return rejectWithValue(message);
   }
 });
 
@@ -119,21 +107,19 @@ export const resetPassword = createAsyncThunk<
   try {
     await resetPasswordApi(data);
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при сбросе пароля');
+    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    return rejectWithValue(message);
   }
 });
 
-type TUserState = {
+export type TUserState = {
   user: TUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 };
 
-const initialState: TUserState = {
+export const initialState: TUserState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
@@ -160,6 +146,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.user = null;
+          state.error = action.payload ?? 'Произошла ошибка при загрузке пользователя';
         }
       )
       .addCase(registerUser.pending, (state) => {
