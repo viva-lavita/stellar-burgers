@@ -77,7 +77,7 @@ describe('feedSlice async thunk', () => {
   test('getFeeds.rejected — обрабатывает ошибку и устанавливает сообщение', async () => {
     (getFeedsApi as jest.Mock).mockRejectedValue(new Error('Network error'));
     const store = createTestStore();
-    await store.dispatch(getFeeds());
+    await store.dispatch(getFeeds()); 
     const state = store.getState().feed;
 
     expect(state.isLoading).toBe(false);
@@ -90,8 +90,8 @@ describe('feedSlice async thunk', () => {
     await store.dispatch(getFeeds());
     const state = store.getState().feed;
 
-    expect(state.error).toBe('Произошла ошибка при загрузке заказов');
-  });
+    expect(state.error).toBe('Не удалось загрузить заказы');
+  });  
 });
 
 describe('feedSlice selectors', () => {

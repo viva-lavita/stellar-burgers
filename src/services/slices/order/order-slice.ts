@@ -5,7 +5,7 @@ import { TOrder } from '@utils-types';
 export const postOrder = createAsyncThunk<
   TOrder,
   string[],
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('order/postOrder', async (data, { rejectWithValue }) => {
   try {
     const response = await orderBurgerApi(data);
@@ -14,14 +14,14 @@ export const postOrder = createAsyncThunk<
     if (error instanceof Error && 'message' in error) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Произошла ошибка при оформлении заказа');
+    return rejectWithValue(undefined);
   }
 });
 
 export const getOrders = createAsyncThunk<
   TOrder[],
   void,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('order/getOrders', async (_, { rejectWithValue }) => {
   try {
     const response = await getOrdersApi();
@@ -30,7 +30,7 @@ export const getOrders = createAsyncThunk<
     if (error instanceof Error && 'message' in error) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Произошла ошибка при получении заказов');
+    return rejectWithValue(undefined);
   }
 });
 
@@ -39,7 +39,7 @@ export const getOrders = createAsyncThunk<
 export const getOrderByNumber = createAsyncThunk<
   TOrder,
   number,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('order/getOrdersByNumber', async (number, { rejectWithValue }) => {
   try {
     const response = await getOrderByNumberApi(number);
@@ -48,7 +48,7 @@ export const getOrderByNumber = createAsyncThunk<
     if (error instanceof Error && 'message' in error) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Произошла ошибка при получении заказа');
+    return rejectWithValue(undefined);
   }
 });
 

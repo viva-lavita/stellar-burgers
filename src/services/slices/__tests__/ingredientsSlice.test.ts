@@ -100,7 +100,7 @@ describe('getIngredients async thunk', () => {
     await store.dispatch(getIngredients());
     const state = store.getState().ingredients;
 
-    expect(state.ingredients).toEqual([]);
+    expect(state.ingredients).toEqual([]); 
     expect(state.isLoading).toBe(false);
     expect(state.error).toBe(ERROR_MESSAGE);
   });

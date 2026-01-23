@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">87.03% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>47/54</span>
+                <span class='fraction'>61/61</span>
             </div>
         
             
@@ -630,14 +630,14 @@ import {
 } from '@api';
 import { setCookie } from '../../../utils/cookie';
 &nbsp;
-export const getUser = createAsyncThunk&lt;TUser, void, { rejectValue: string }&gt;(
+export const getUser = createAsyncThunk&lt;TUser, void, { rejectValue: string | undefined }&gt;(
   'user/getUser',
   async (_, { rejectWithValue }) =&gt; {
     try {
       const response = await getUserApi();
       return response.user;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      const message = error instanceof Error ? error.message : undefined;
       return rejectWithValue(message);
     }
   }
@@ -646,7 +646,7 @@ export const getUser = createAsyncThunk&lt;TUser, void, { rejectValue: string }&
 export const registerUser = createAsyncThunk&lt;
   TUser,
   TRegisterData,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 &gt;('user/registerUser', async (data, { rejectWithValue }) =&gt; {
   try {
     const response = await registerUserApi(data);
@@ -654,7 +654,7 @@ export const registerUser = createAsyncThunk&lt;
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    const message = error instanceof Error ? error.message : undefined;
     return rejectWithValue(message);
   }
 });
@@ -662,7 +662,7 @@ export const registerUser = createAsyncThunk&lt;
 export const loginUser = createAsyncThunk&lt;
   TUser,
   TLoginData,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 &gt;('user/loginUser', async (data, { rejectWithValue }) =&gt; {
   try {
     const response = await loginUserApi(data);
@@ -670,12 +670,12 @@ export const loginUser = createAsyncThunk&lt;
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    const message = error instanceof Error ? error.message : undefined;
     return rejectWithValue(message);
   }
 });
 &nbsp;
-export const logoutUser = createAsyncThunk&lt;void, void, { rejectValue: string }&gt;(
+export const logoutUser = createAsyncThunk&lt;void, void, { rejectValue: string | undefined }&gt;(
   'user/logoutUser',
   async (_, { rejectWithValue }) =&gt; {
     try {
@@ -683,7 +683,7 @@ export const logoutUser = createAsyncThunk&lt;void, void, { rejectValue: string 
       localStorage.removeItem('refreshToken');
       setCookie('accessToken', '', { expires: -1 });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      const message = error instanceof Error ? error.message : undefined;
       return rejectWithValue(message);
     }
   }
@@ -692,13 +692,13 @@ export const logoutUser = createAsyncThunk&lt;void, void, { rejectValue: string 
 export const updateUser = createAsyncThunk&lt;
   TUser,
   Partial&lt;TRegisterData&gt;,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 &gt;('user/updateUser', async (data, { rejectWithValue }) =&gt; {
   try {
     const response = await updateUserApi(data);
     return response.user;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    const message = error instanceof Error ? error.message : undefined;
     return rejectWithValue(message);
   }
 });
@@ -706,12 +706,12 @@ export const updateUser = createAsyncThunk&lt;
 export const forgotPassword = createAsyncThunk&lt;
   void,
   string,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 &gt;('user/forgotPassword', async (email, { rejectWithValue }) =&gt; {
   try {
     await forgotPasswordApi({ email });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    const message = error instanceof Error ? error.message : undefined;
     return rejectWithValue(message);
   }
 });
@@ -719,12 +719,12 @@ export const forgotPassword = createAsyncThunk&lt;
 export const resetPassword = createAsyncThunk&lt;
   void,
   { password: string; token: string },
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 &gt;('user/resetPassword', async (data, { rejectWithValue }) =&gt; {
   try {
     await resetPasswordApi(data);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
+    const message = error instanceof Error ? error.message : undefined;
     return rejectWithValue(message);
   }
 });
@@ -763,7 +763,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.user = null;
-          state.error = action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при загрузке пользователя';</span>
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(registerUser.pending, (state) =&gt; {
@@ -785,7 +785,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.error =
-            action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при регистрации пользователя';</span>
+            action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(loginUser.pending, (state) =&gt; {
@@ -804,7 +804,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.error =
-            action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при авторизации пользователя';</span>
+            action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(logoutUser.pending, (state) =&gt; {
@@ -823,7 +823,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.error =
-            action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при выходе пользователя';</span>
+            action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(updateUser.pending, (state) =&gt; {
@@ -840,7 +840,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction&lt;string | undefined&gt;) =&gt; {
           state.isLoading = false;
           state.error =
-            action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при обновлении пользователя';</span>
+            action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(resetPassword.pending, (state) =&gt; {
@@ -855,7 +855,7 @@ export const userSlice = createSlice({
         resetPassword.rejected,
         (state, action: PayloadAction&lt;string | undefined&gt;) =&gt; {
           state.isLoading = false;
-          state.error = action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при сбросе пароля';</span>
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(forgotPassword.pending, (state) =&gt; {
@@ -871,7 +871,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction&lt;string | undefined&gt;) =&gt; {
           state.isLoading = false;
           state.error =
-            action.payload<span class="branch-0 cbranch-no" title="branch not covered" > ?? 'Произошла ошибка при восстановлении пароля';</span>
+            action.payload ?? 'Неизвестная ошибка';
         }
       );
   },
@@ -898,7 +898,7 @@ export default userSlice.reducer;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-23T15:54:58.465Z
+                at 2026-01-23T22:01:23.454Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

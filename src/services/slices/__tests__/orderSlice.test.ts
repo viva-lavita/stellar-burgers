@@ -155,7 +155,7 @@ describe('orderSlice asyncThunk', () => {
 
     test('getOrderByNumber.fulfilled — обновляет currentOrder и добавляет в allOrders', async () => {
       (getOrderByNumberApi as jest.Mock).mockResolvedValue([MOCK_ORDER]);
-      const store = createTestStore();
+      const store = createTestStore(); 
       await store.dispatch(getOrderByNumber(10001));
       const state = store.getState().order;
 

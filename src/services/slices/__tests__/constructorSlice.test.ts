@@ -13,7 +13,7 @@ import {
 import { TIngredient, TConstructorIngredient } from '@utils-types';
 
 const MOCK_BUN: TIngredient = {
-  _id: 'bun-1',
+  _id: 'bun-1', 
   name: 'Краторная булка N-200i',
   type: 'bun',
   proteins: 80,

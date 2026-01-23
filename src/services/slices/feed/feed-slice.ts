@@ -11,7 +11,7 @@ import { TOrder, TOrdersData } from '@utils-types';
 export const getFeeds = createAsyncThunk<
   TOrdersData,
   void,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('feed/getFeeds', async (_, { rejectWithValue }) => {
   try {
     const response = await getFeedsApi();
@@ -21,7 +21,7 @@ export const getFeeds = createAsyncThunk<
     if (error instanceof Error && 'message' in error) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Произошла ошибка при загрузке заказов');
+    return rejectWithValue(undefined);
   }
 });
 
@@ -71,7 +71,7 @@ export const feedSlice = createSlice({
   },
   selectors: {
     selectFeed: (state) => state,
-    selectOrders: (state) => state.orders, // не поняла как их отфильтровать по пользователю
+    selectOrders: (state) => state.orders,
     selectTotal: (state) => state.total,
     selectTotalToday: (state) => state.totalToday,
     selectFeedIsLoading: (state) => state.isLoading,

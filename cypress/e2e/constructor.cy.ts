@@ -95,12 +95,12 @@ describe('Тестирование страницы конструктора', (
       // Кликаем на булку
       cy.get(buns).first().find('button').click();
 
-      // Проверяем, что булка появилась в списке
+      // Проверяем, что булка появилась в списке топ
       cy.get('[data-testid="bun-top"]').contains(
         firstBunFixture.name + ' (верх)'
       );
 
-      // Проверяем, что булка появилась в списке
+      // Проверяем, что булка появилась в списке низ
       cy.get('[data-testid="bun-bottom"]').contains(
         firstBunFixture.name + ' (низ)'
       );
