@@ -25,7 +25,7 @@ export const getFeeds = createAsyncThunk<
   }
 });
 
-type TFeedState = {
+export type TFeedState = {
   orders: TOrder[];
   total: number;
   totalToday: number;
@@ -49,7 +49,6 @@ export const feedSlice = createSlice({
     builder
       .addCase(getFeeds.pending, (state) => {
         state.isLoading = true;
-        console.log('getFeeds.pending');
         state.error = null;
       })
       .addCase(
@@ -66,7 +65,7 @@ export const feedSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.error =
-            action.payload ?? 'Произошла ошибка при загрузке заказов';
+            action.payload ?? 'Не удалось загрузить заказы';
         }
       );
   },
