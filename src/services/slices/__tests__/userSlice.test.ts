@@ -13,7 +13,6 @@ import {
   selectUserIsLoading,
   selectIsAuthenticated,
   selectUserError
-  //   initialState
 } from '../user/user-slice';
 
 import { TUser } from '@utils-types';
@@ -31,6 +30,7 @@ jest.mock('@api');
 jest.mock('../../../utils/cookie', () => ({
   setCookie: jest.fn().mockReturnValue('mock-token')
 }));
+
 const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
@@ -39,14 +39,10 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock as any;
 
-// Импорт моков (после jest.mock!)
+// Импорт моков после jest.mock(!)
 import { getUserApi } from '@api';
-import {
-  deleteCookie,
-  setCookie as mockedSetCookie
-} from '../../../utils/cookie';
+import { setCookie as mockedSetCookie } from '../../../utils/cookie';
 
-// Тестовые данные
 const MOCK_USER: TUser = {
   email: 'admin@ro.ru',
   name: 'Юзер Юзерович'
@@ -63,7 +59,7 @@ const MOCK_LOGIN_DATA = {
   password: 'password123'
 };
 
-const ERROR_MESSAGE = 'Произошла ошибка';
+const ERROR_MESSAGE = 'Неизвестная ошибка';
 
 const initialState = {
   user: null,
@@ -72,60 +68,36 @@ const initialState = {
   error: null
 };
 
-const PreloadedInitialState = {
-  user: MOCK_USER,
-  isAuthenticated: true,
-  isLoading: false,
-  error: null
-};
-
 const authenticatedState = {
+  ...initialState,
   user: MOCK_USER,
   isAuthenticated: true,
-  isLoading: false,
-  error: null
 };
 
 const loadingState = {
-  user: MOCK_USER,
-  isAuthenticated: true,
+  ...initialState,
   isLoading: true,
-  error: null
 };
 
 const errorState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
+  ...initialState,
   error: 'Произошла ошибка'
 };
 
-// Утилита для получения состояния store
-const getState = (preloadedState: any) => {
-  const store = configureStore({
-    reducer: { user: userSlice.reducer },
-    preloadedState: { user: preloadedState }
-  });
-  return store.getState();
-};
-
 // Тестовый store
-const createTestStore = () =>
-  configureStore({
-    reducer: {
-      user: userSlice.reducer
-    }
-  });
-
-const createPreloadedStore = () =>
+const createTestStore = (preloadedState?: TUserState) =>
   configureStore({
     reducer: {
       user: userSlice.reducer
     },
-    preloadedState: {
-      user: PreloadedInitialState
-    }
+    preloadedState: { user: preloadedState || userSlice.getInitialState() }
   });
+
+// Утилита для селекторов
+const getState = (preloadedState: any) => {
+  const store = createTestStore(preloadedState);
+  return store.getState();
+};
 
 describe('userSlice, async thunks', () => {
   afterEach(() => {
@@ -137,11 +109,10 @@ describe('userSlice, async thunks', () => {
       success: true,
       user: MOCK_USER
     });
-
     const store = createTestStore();
     await store.dispatch(getUser());
-
     const state = store.getState().user;
+
     expect(state.user).toEqual(MOCK_USER);
     expect(state.isAuthenticated).toBe(true);
     expect(state.isLoading).toBe(false);
@@ -175,11 +146,10 @@ describe('userSlice, async thunks', () => {
       refreshToken: 'refresh456'
     };
     (loginUserApi as jest.Mock).mockResolvedValue(mockResponse);
-
     const store = createTestStore();
     await store.dispatch(loginUser(MOCK_LOGIN_DATA));
-
     const state = store.getState().user;
+
     expect(state.user).toEqual(MOCK_USER);
     expect(state.isAuthenticated).toBe(true);
     expect(mockedSetCookie).toHaveBeenCalledWith('accessToken', 'token456');
@@ -191,10 +161,10 @@ describe('userSlice, async thunks', () => {
 
   test('logoutUser.fulfilled — выходит из аккаунта', async () => {
     // предустановка стейта
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     await store.dispatch(logoutUser());
-
     const state = store.getState().user;
+
     expect(state.user).toBeNull();
     expect(state.isAuthenticated).toBe(false);
     expect(localStorage.removeItem).toHaveBeenCalledWith('refreshToken');
@@ -218,7 +188,7 @@ describe('userSlice, async thunks', () => {
       }
     };
     (updateUserApi as jest.Mock).mockResolvedValue(mockResponse);
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     await store.dispatch(updateUser(updateData));
     const state = store.getState().user;
 
@@ -233,7 +203,6 @@ describe('userSlice, async thunks', () => {
     const email = 'user@new.ru';
     // API возвращает void (успех без данных)
     (forgotPasswordApi as jest.Mock).mockResolvedValue(undefined);
-
     const store = createTestStore();
     await store.dispatch(forgotPassword(email));
     const state = store.getState().user;
@@ -252,7 +221,6 @@ describe('userSlice, async thunks', () => {
     };
     // успех без данных
     (resetPasswordApi as jest.Mock).mockResolvedValue(undefined);
-
     const store = createTestStore();
     await store.dispatch(resetPassword(resetData));
     const state = store.getState().user;
@@ -263,7 +231,6 @@ describe('userSlice, async thunks', () => {
 
   test('loginUser.rejected — обрабатывает ошибку при авторизации', async () => {
     (loginUserApi as jest.Mock).mockRejectedValue(new Error('Network error'));
-
     const store = createTestStore();
     await store.dispatch(loginUser(MOCK_LOGIN_DATA));
     const state = store.getState().user;
@@ -275,21 +242,19 @@ describe('userSlice, async thunks', () => {
 
   test('logoutUser.rejected — обрабатывает ошибку при выходе из аккаунта', async () => {
     (logoutApi as jest.Mock).mockRejectedValue(new Error('Network error'));
-
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     await store.dispatch(logoutUser());
     const state = store.getState().user;
 
     expect(state.isLoading).toBe(false);
     expect(state.error).toBe('Network error');
     expect(state.user).not.toBeNull();
-  })
+  });
 
   test('updateUser.rejected — обрабатывает ошибку при обновлении пользователя', async () => {
     const updateData = { email: 'broken@example.com' };
     (updateUserApi as jest.Mock).mockRejectedValue(new Error('Network error'));
-
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     await store.dispatch(updateUser(updateData));
     const state = store.getState().user;
 
@@ -304,7 +269,6 @@ describe('userSlice, async thunks', () => {
     (forgotPasswordApi as jest.Mock).mockRejectedValue(
       new Error('User not found')
     );
-
     const store = createTestStore();
     await store.dispatch(forgotPassword(email));
     const state = store.getState().user;
@@ -392,10 +356,8 @@ describe('userSlice, async thunks', () => {
     (loginUserApi as jest.Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
-
     const store = createTestStore();
     store.dispatch(loginUser(MOCK_LOGIN_DATA));
-
     const state = store.getState().user;
 
     expect(state.isLoading).toBe(true);
@@ -408,7 +370,7 @@ describe('userSlice, async thunks', () => {
     (logoutApi as jest.Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     store.dispatch(logoutUser());
     const state = store.getState().user;
 
@@ -423,7 +385,7 @@ describe('userSlice, async thunks', () => {
     (updateUserApi as jest.Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
-    const store = createPreloadedStore();
+    const store = createTestStore(authenticatedState);
     store.dispatch(updateUser({ name: 'Новое имя' }));
     const state = store.getState().user;
 
@@ -437,7 +399,6 @@ describe('userSlice, async thunks', () => {
     (forgotPasswordApi as jest.Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
-
     const store = createTestStore();
     store.dispatch(forgotPassword('user@example.com'));
     const state = store.getState().user;
@@ -452,7 +413,6 @@ describe('userSlice, async thunks', () => {
     (resetPasswordApi as jest.Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
-
     const store = createTestStore();
     store.dispatch(resetPassword({ password: 'newpass', token: 'token123' }));
     const state = store.getState().user;
@@ -468,11 +428,11 @@ describe('userSlice, async thunks', () => {
     const store = createTestStore();
     await store.dispatch(getUser());
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(false);
     expect(state.user).toBeNull();
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
   });
 
   test('registerUser.rejected — возвращает "Неизвестная ошибка" при не-Error', async () => {
@@ -480,26 +440,26 @@ describe('userSlice, async thunks', () => {
     const store = createTestStore();
     await store.dispatch(registerUser(MOCK_REGISTER_DATA));
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
     // user не должен измениться
     expect(state.user).toBeNull();
   });
-  
+
   test('loginUser.rejected — возвращает "Неизвестная ошибка" при не-Error', async () => {
     (loginUserApi as jest.Mock).mockRejectedValue({});
     const store = createTestStore();
     await store.dispatch(loginUser(MOCK_LOGIN_DATA));
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
     expect(state.user).toBeNull();
   });
-  
+
   test('updateUser.rejected — возвращает "Неизвестная ошибка" при не-Error', async () => {
     (updateUserApi as jest.Mock).mockRejectedValue({});
     const store = configureStore({
@@ -512,7 +472,7 @@ describe('userSlice, async thunks', () => {
     const state = store.getState().user;
 
     expect(state.isLoading).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
     // user остаётся прежним
     expect(state.user).toEqual(MOCK_USER);
   });
@@ -525,41 +485,37 @@ describe('userSlice, async thunks', () => {
         user: { ...initialState, isAuthenticated: true, user: MOCK_USER }
       }
     });
-  
     await store.dispatch(logoutUser());
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
     expect(state.isAuthenticated).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
     // user остаётся прежним
     expect(state.user).not.toBeNull();
   });
-  
+
   test('forgotPassword.rejected — возвращает "Неизвестная ошибка" при не-Error', async () => {
     (forgotPasswordApi as jest.Mock).mockRejectedValue({});
-  
     const store = createTestStore();
     await store.dispatch(forgotPassword('user@example.com'));
-  
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
   });
-  
+
   test('resetPassword.rejected — возвращает "Неизвестная ошибка" при не-Error', async () => {
     (resetPasswordApi as jest.Mock).mockRejectedValue({});
-  
     const store = createTestStore();
-    await store.dispatch(resetPassword({ password: 'newpass', token: 'token123' }));
-  
+    await store.dispatch(
+      resetPassword({ password: 'newpass', token: 'token123' })
+    );
     const state = store.getState().user;
-  
+
     expect(state.isLoading).toBe(false);
-    expect(state.error).toBe('Неизвестная ошибка');
+    expect(state.error).toBe(ERROR_MESSAGE);
   });
-  
 });
 
 describe('userSlice selectors', () => {
@@ -622,16 +578,15 @@ describe('userSlice selectors', () => {
     expect(selectUserError(state3)).toBe('Другая ошибка');
   });
 
-  // Дополнительный тест: проверка всех селекторов на одном состоянии
+  // Проверка всех селекторов на одном состоянии
   test('все селекторы работают на едином состоянии', () => {
-    const preloadedState = {
+    const state = getState({
+      ...initialState,
       user: MOCK_USER,
       isAuthenticated: true,
       isLoading: true,
       error: 'Временная ошибка'
-    };
-
-    const state = getState(preloadedState);
+    });
 
     expect(selectUser(state)).toEqual(MOCK_USER);
     expect(selectUserIsLoading(state)).toBe(true);

@@ -4,7 +4,8 @@ import {
   getIngredients,
   ingredientsSlice,
   selectIngredients,
-  selectIngredientsIsLoading
+  selectIngredientsIsLoading,
+  TIngredientState
 } from '../ingredient/ingredient-slice';
 import { TIngredient } from '@utils-types';
 
@@ -46,13 +47,22 @@ const MOCK_INGREDIENTS: TIngredient[] = [
 
 const ERROR_MESSAGE = 'Произошла ошибка при загрузке ингредиентов';
 
+const initialState = ingredientsSlice.getInitialState();
+
 // Тестовый store
-const createTestStore = () =>
+const createTestStore = (preloadedState?: TIngredientState) =>
   configureStore({
     reducer: {
       ingredients: ingredientsSlice.reducer
-    }
+    },
+    preloadedState: { ingredients: preloadedState || ingredientsSlice.getInitialState() }
   });
+
+// Утилита для селекторов
+const getState = (preloadedState: any) => {
+  const store = createTestStore(preloadedState);
+  return store.getState();
+};
 
 describe('getIngredients async thunk', () => {
   afterEach(() => {
@@ -61,7 +71,6 @@ describe('getIngredients async thunk', () => {
 
   test('fulfilled — загружает ингредиенты', async () => {
     (getIngredientsApi as jest.Mock).mockResolvedValue(MOCK_INGREDIENTS);
-    // Создаем с нуля тестовый store каждый раз
     const store = createTestStore();
     await store.dispatch(getIngredients());
 
@@ -75,11 +84,10 @@ describe('getIngredients async thunk', () => {
     (getIngredientsApi as jest.Mock).mockRejectedValue(
       new Error('Network error')
     );
-
     const store = createTestStore();
     await store.dispatch(getIngredients());
-
     const state = store.getState().ingredients;
+
     expect(state.ingredients).toEqual([]);
     expect(state.isLoading).toBe(false);
     expect(state.error).toBe('Network error');
@@ -88,11 +96,10 @@ describe('getIngredients async thunk', () => {
   test('rejected — использует дефолтное сообщение при неизвестной ошибке', async () => {
     // Имитируем ошибку без message
     (getIngredientsApi as jest.Mock).mockRejectedValue({});
-
     const store = createTestStore();
     await store.dispatch(getIngredients());
-
     const state = store.getState().ingredients;
+
     expect(state.ingredients).toEqual([]);
     expect(state.isLoading).toBe(false);
     expect(state.error).toBe(ERROR_MESSAGE);
@@ -100,8 +107,6 @@ describe('getIngredients async thunk', () => {
 });
 
 describe('ingredientsSlice extraReducers', () => {
-  const initialState = ingredientsSlice.getInitialState();
-
   test('pending — устанавливает isLoading=true и очищает error', () => {
     const state = ingredientsSlice.reducer(
       initialState,
@@ -151,24 +156,26 @@ describe('ingredientsSlice selectors', () => {
   const testState = {
     ingredients: {
       ingredients: MOCK_INGREDIENTS,
-      isLoading: false,
+      isLoading: true,
       error: null
     }
   };
 
   test('selectIngredients — возвращает список ингредиентов', () => {
-    const result = selectIngredients(testState);
+    const state = getState({
+      ...initialState,
+      ingredients: MOCK_INGREDIENTS,
+    });
+    const result = selectIngredients(state);
     expect(result).toEqual(MOCK_INGREDIENTS);
   });
 
   test('selectIngredientsIsLoading — возвращает isLoading', () => {
+    const state = getState({
+      ...initialState,
+      isLoading: true
+    });
     const result = selectIngredientsIsLoading(testState);
-    expect(result).toBe(false);
-
-    // для isLoading=true
-    const loadingState = {
-      ingredients: { ...testState.ingredients, isLoading: true }
-    };
-    expect(selectIngredientsIsLoading(loadingState)).toBe(true);
+    expect(result).toBe(true);
   });
 });

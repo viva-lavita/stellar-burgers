@@ -52,7 +52,7 @@ export const getOrderByNumber = createAsyncThunk<
   }
 });
 
-type TOrderState = {
+export type TOrderState = {
   currentOrder: TOrder | null;
   allOrders: TOrder[];
   loading: boolean;
