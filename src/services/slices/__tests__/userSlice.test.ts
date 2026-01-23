@@ -33,7 +33,7 @@ jest.mock('../../../utils/cookie', () => ({
 
 const localStorageMock = {
   setItem: jest.fn(),
-  removeItem: jest.fn(), 
+  removeItem: jest.fn(),
   getItem: jest.fn().mockReturnValue(null),
   clear: jest.fn()
 };
@@ -71,12 +71,12 @@ const initialState = {
 const authenticatedState = {
   ...initialState,
   user: MOCK_USER,
-  isAuthenticated: true,
+  isAuthenticated: true
 };
 
 const loadingState = {
   ...initialState,
-  isLoading: true,
+  isLoading: true
 };
 
 const errorState = {

@@ -13,18 +13,19 @@ import {
 } from '@api';
 import { setCookie } from '../../../utils/cookie';
 
-export const getUser = createAsyncThunk<TUser, void, { rejectValue: string | undefined }>(
-  'user/getUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await getUserApi();
-      return response.user;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : undefined;
-      return rejectWithValue(message);
-    }
+export const getUser = createAsyncThunk<
+  TUser,
+  void,
+  { rejectValue: string | undefined }
+>('user/getUser', async (_, { rejectWithValue }) => {
+  try {
+    const response = await getUserApi();
+    return response.user;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
-);
+});
 
 export const registerUser = createAsyncThunk<
   TUser,
@@ -58,19 +59,20 @@ export const loginUser = createAsyncThunk<
   }
 });
 
-export const logoutUser = createAsyncThunk<void, void, { rejectValue: string | undefined }>(
-  'user/logoutUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      await logoutApi();
-      localStorage.removeItem('refreshToken');
-      setCookie('accessToken', '', { expires: -1 });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : undefined;
-      return rejectWithValue(message);
-    }
+export const logoutUser = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: string | undefined }
+>('user/logoutUser', async (_, { rejectWithValue }) => {
+  try {
+    await logoutApi();
+    localStorage.removeItem('refreshToken');
+    setCookie('accessToken', '', { expires: -1 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
-);
+});
 
 export const updateUser = createAsyncThunk<
   TUser,
@@ -167,8 +169,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Неизвестная ошибка';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(loginUser.pending, (state) => {
@@ -186,8 +187,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Неизвестная ошибка';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(logoutUser.pending, (state) => {
@@ -205,8 +205,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Неизвестная ошибка';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(updateUser.pending, (state) => {
@@ -222,8 +221,7 @@ export const userSlice = createSlice({
         updateUser.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error =
-            action.payload ?? 'Неизвестная ошибка';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(resetPassword.pending, (state) => {
@@ -253,8 +251,7 @@ export const userSlice = createSlice({
         forgotPassword.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error =
-            action.payload ?? 'Неизвестная ошибка';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       );
   },
