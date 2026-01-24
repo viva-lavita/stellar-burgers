@@ -7,5 +7,5 @@
     // чтобы избежать пересечения с типами jest
     "types": ["cypress"]
   },
-  "include": ["../node_modules/cypress", "./**/*.ts"]
+  "include": ["./**/*.ts", "../cypress.d.ts"],
 }

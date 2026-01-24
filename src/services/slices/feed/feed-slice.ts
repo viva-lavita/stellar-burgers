@@ -64,8 +64,7 @@ export const feedSlice = createSlice({
         getFeeds.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error =
-            action.payload ?? 'Не удалось загрузить заказы';
+          state.error = action.payload ?? 'Не удалось загрузить заказы';
         }
       );
   },
