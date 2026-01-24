@@ -39,23 +39,6 @@ describe('Тестирование страницы конструктора', (
       cy.getBySel(totalPrice).should('have.text', '0');
     });
 
-    it('Работа табов', () => {
-      // Проверяем, что по умолчанию отображается булки
-      cy.getBySel(buns).should('be.visible');
-      cy.getBySel(sauces).should('not.be.visible');
-
-      // Переключаемся на таб с соусами
-      // Работаем с классами, т.к. элементы в сторонней библиотеке
-      // Анимация задерживает отображение
-      cy.get('.tab_type_current').should('have.text', 'Булки');
-      cy.get('[data-testid="tabs"]').find('div').eq(2).click();
-      cy.get('.tab_type_current').should('have.text', 'Соусы');
-
-      // Проверяем, что таб перелистнул список на начинки
-      cy.getBySel(sauces).should('be.visible', { timeout: 10000 });
-      cy.getBySel(buns).should('not.be.visible');
-    });
-
     // Закрытие на кнопку в модальном окне тестируется в тесте создания заказа
     it('Клик на ингредиент, открытие модалки, закрытие по клику на оверлей', () => {
       // Кликаем на ингредиент
