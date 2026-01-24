@@ -135,6 +135,10 @@ describe('Тестирование страницы конструктора', (
 
   describe('Оформления заказа авторизованным пользователем', () => {
     beforeEach(() => {
+      // Очистка перед тестом, а не после, best practices
+      // https://docs.cypress.io/app/core-concepts/best-practices#Using-after-Or-afterEach-Hooks
+      deleteCookie('accessToken');
+      localStorage.removeItem('refreshToken');
       // Мокируем API
       cy.intercept('GET', '/api/ingredients', {
         fixture: 'ingredients.json'
@@ -184,11 +188,6 @@ describe('Тестирование страницы конструктора', (
 
       // Цена стала 0
       cy.getBySel(totalPrice).should('have.text', '0');
-    });
-
-    afterEach(() => {
-      deleteCookie('accessToken');
-      localStorage.removeItem('refreshToken');
     });
   });
 });
