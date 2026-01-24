@@ -13,25 +13,24 @@ import {
 } from '@api';
 import { setCookie } from '../../../utils/cookie';
 
-export const getUser = createAsyncThunk<TUser, void, { rejectValue: string }>(
-  'user/getUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await getUserApi();
-      return response.user;
-    } catch (error) {
-      if (error instanceof Error && 'message' in error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('Произошла ошибка при загрузке пользователя');
-    }
+export const getUser = createAsyncThunk<
+  TUser,
+  void,
+  { rejectValue: string | undefined }
+>('user/getUser', async (_, { rejectWithValue }) => {
+  try {
+    const response = await getUserApi();
+    return response.user;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
-);
+});
 
 export const registerUser = createAsyncThunk<
   TUser,
   TRegisterData,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('user/registerUser', async (data, { rejectWithValue }) => {
   try {
     const response = await registerUserApi(data);
@@ -39,17 +38,15 @@ export const registerUser = createAsyncThunk<
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при регистрации пользователя');
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
 });
 
 export const loginUser = createAsyncThunk<
   TUser,
   TLoginData,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('user/loginUser', async (data, { rejectWithValue }) => {
   try {
     const response = await loginUserApi(data);
@@ -57,83 +54,74 @@ export const loginUser = createAsyncThunk<
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при авторизации пользователя');
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
 });
 
-export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
-  'user/logoutUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      await logoutApi();
-      localStorage.removeItem('refreshToken');
-      setCookie('accessToken', '', { expires: -1 });
-    } catch (error) {
-      if (error instanceof Error && 'message' in error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('Произошла ошибка при выходе пользователя');
-    }
+export const logoutUser = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: string | undefined }
+>('user/logoutUser', async (_, { rejectWithValue }) => {
+  try {
+    await logoutApi();
+    localStorage.removeItem('refreshToken');
+    setCookie('accessToken', '', { expires: -1 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
-);
+});
 
 export const updateUser = createAsyncThunk<
   TUser,
   Partial<TRegisterData>,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('user/updateUser', async (data, { rejectWithValue }) => {
   try {
     const response = await updateUserApi(data);
     return response.user;
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при обновлении пользователя');
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
 });
 
 export const forgotPassword = createAsyncThunk<
   void,
   string,
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('user/forgotPassword', async (email, { rejectWithValue }) => {
   try {
     await forgotPasswordApi({ email });
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при восстановлении пароля');
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
 });
 
 export const resetPassword = createAsyncThunk<
   void,
   { password: string; token: string },
-  { rejectValue: string }
+  { rejectValue: string | undefined }
 >('user/resetPassword', async (data, { rejectWithValue }) => {
   try {
     await resetPasswordApi(data);
   } catch (error) {
-    if (error instanceof Error && 'message' in error) {
-      return rejectWithValue(error.message);
-    }
-    return rejectWithValue('Произошла ошибка при сбросе пароля');
+    const message = error instanceof Error ? error.message : undefined;
+    return rejectWithValue(message);
   }
 });
 
-type TUserState = {
+export type TUserState = {
   user: TUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 };
 
-const initialState: TUserState = {
+export const initialState: TUserState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
@@ -160,6 +148,7 @@ export const userSlice = createSlice({
           state.isLoading = false;
           state.isAuthenticated = false;
           state.user = null;
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(registerUser.pending, (state) => {
@@ -180,8 +169,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Произошла ошибка при регистрации пользователя';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(loginUser.pending, (state) => {
@@ -199,8 +187,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Произошла ошибка при авторизации пользователя';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(logoutUser.pending, (state) => {
@@ -218,8 +205,7 @@ export const userSlice = createSlice({
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
           state.isAuthenticated = false;
-          state.error =
-            action.payload ?? 'Произошла ошибка при выходе пользователя';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(updateUser.pending, (state) => {
@@ -235,8 +221,7 @@ export const userSlice = createSlice({
         updateUser.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error =
-            action.payload ?? 'Произошла ошибка при обновлении пользователя';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(resetPassword.pending, (state) => {
@@ -251,7 +236,7 @@ export const userSlice = createSlice({
         resetPassword.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error = action.payload ?? 'Произошла ошибка при сбросе пароля';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       )
       .addCase(forgotPassword.pending, (state) => {
@@ -266,8 +251,7 @@ export const userSlice = createSlice({
         forgotPassword.rejected,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoading = false;
-          state.error =
-            action.payload ?? 'Произошла ошибка при восстановлении пароля';
+          state.error = action.payload ?? 'Неизвестная ошибка';
         }
       );
   },
